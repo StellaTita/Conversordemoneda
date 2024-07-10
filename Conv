@@ -1,0 +1,49 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import org.json.JSONObject;
+
+public class CurrencyConverter {
+
+    public static void main(String[] args) {
+        // Menú y lógica de conversión
+        System.out.println("Bienvenido al conversor de monedas");
+        System.out.println("1. Convertir USD a ARS");
+        // Otras opciones...
+        
+        // Obtener la tasa de cambio desde la API
+        double tasaDeCambio = obtenerTasaDeCambio("USD", "ARS");
+        // Realizar la conversión
+        double valorConvertido = convertirMoneda(25, tasaDeCambio);
+        System.out.println("25 USD equivalen a " + valorConvertido + " ARS");
+    }
+
+    private static double obtenerTasaDeCambio(String from, String to) {
+        try {
+            String apiKey = "YOUR_API_KEY";
+            URL url = new URL("https://api.exchangerate-api.com/v4/latest/" + from);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            conn.disconnect();
+            
+            JSONObject json = new JSONObject(content.toString());
+            return json.getJSONObject("rates").getDouble(to);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
+    private static double convertirMoneda(double cantidad, double tasaDeCambio) {
+        return cantidad * tasaDeCambio;
+    }
+}
